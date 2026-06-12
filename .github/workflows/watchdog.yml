@@ -28,11 +28,3 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: python cloud_watchdog.py
-
-    - name: Save Data to GitHub
-      run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
-        git add database/scraped_market_data.xlsx
-        git commit -m "Saved daily market data" || echo "No changes to commit"
-        git push
