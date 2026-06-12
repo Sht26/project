@@ -166,25 +166,35 @@ def process_all_company_datasets(ticker):
     print(f"\n" + "="*33 + f" END OF {ticker.upper()} DATASET " + "="*34 + "\n")
 
 # ---------------------------------------------------------
-# 4. CONFIGURABLE RUNTIME AUTOMATION LOOP
+# 4. CLOUD EXECUTION & EXPORT ENGINE
 # ---------------------------------------------------------
 
-# Ticker tracking configurations
-target_universe = ['RELIANCE', 'TCS']
-
-# Set your refresh window timer loop (e.g., 43200 seconds = 12 hours)
-# For quick testing, you can change this value to 60 (updates every 60 seconds)
-REFRESH_INTERVAL_SECONDS = 43200 
-
-print("🚀 Starting Automated Live Scraping Loop. Press CTRL+C at any time to terminate.")
-
-while True:
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"\n🔄 [AUTOMATED EVENT]: Pulling latest market data updates at: {current_time}")
+if __name__ == "__main__":
+    target_universe = ['RELIANCE', 'TCS']
     
-    for company in target_universe:
-        process_all_company_datasets(company)
-        time.sleep(2)  # Maintain responsible request pacing between companies
-        
-    print(f"💤 Loop cycle complete. Sleeping for {REFRESH_INTERVAL_SECONDS // 60} minutes until next auto-update...")
-    time.sleep(REFRESH_INTERVAL_SECONDS)
+    # Create the database folder if it doesn't exist
+    os.makedirs("database", exist_ok=True)
+    file_path = "database/scraped_market_data.xlsx"
+    
+    print("🚀 Starting Automated Cloud Scraping Loop...")
+    
+    # Open an Excel writer to save the data physically
+    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        for company in target_universe:
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"\n🔄 [AUTOMATED EVENT]: Pulling latest market data updates at: {current_time}")
+            
+            # Run your custom engine
+            company_data = process_all_company_datasets(company)
+            
+            # Save the results to the Excel file
+            if company_data:
+                for section_name, df in company_data.items():
+                    if df is not None and not df.empty:
+                        sheet_title = f"{company}_{section_name}"[:31] 
+                        df.to_excel(writer, sheet_name=sheet_title, index=False)
+            
+            time.sleep(2)  # Maintain responsible request pacing between companies
+            
+    print(f"\n✅ All data successfully saved to {file_path}!")
+    print("💤 Loop cycle complete. GitHub Actions will handle the next scheduled update automatically.")
