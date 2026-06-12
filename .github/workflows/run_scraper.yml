@@ -33,3 +33,9 @@ jobs:
         git add database/scraped_market_data.xlsx
         git commit -m "Saved daily market data" || echo "No changes to commit"
         git push
+
+    - name: Send Telegram Confirmation
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: python cloud_watchdog.py
