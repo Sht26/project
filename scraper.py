@@ -181,6 +181,11 @@ if __name__ == "__main__":
     
     # Open an Excel writer to save the data physically
     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        
+        # 🚨 THE FIX: Create a default 'Run_Log' sheet so the Excel file is NEVER empty
+        log_df = pd.DataFrame({'Last_Run': [datetime.now().strftime("%Y-%m-%d %H:%M:%S")], 'Status': ['Success']})
+        log_df.to_excel(writer, sheet_name='Run_Log', index=False)
+        
         for company in target_universe:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"\n🔄 [AUTOMATED EVENT]: Pulling latest market data updates at: {current_time}")
